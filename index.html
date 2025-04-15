@@ -19,16 +19,210 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* Your existing styles remain unchanged here */
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: #238636 #0d1117;
+    }
+
+    body::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    body::-webkit-scrollbar-track {
+      background: #0d1117;
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background-color: #238636;
+      border-radius: 10px;
+    }
+
+    .card {
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .form-control, .btn {
+      border-radius: 0.5rem;
+    }
+
+    .btn-primary, .btn-success {
+      background-color: #238636;
+      border-color: #238636;
+    }
+
+    .btn-primary:hover, .btn-success:hover {
+      background-color: #2ea043;
+      border-color: #2ea043;
+    }
+
+    .btn-secondary {
+      background-color: #30363d;
+      border-color: #30363d;
+      color: #c9d1d9;
+    }
+
+    pre {
+      position: relative;
+      background-color: #0d1117;
+      border: 1px solid #30363d;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      max-height: 200px;
+      overflow: auto;
+    }
+
+    .modal-content {
+      background-color: #161b22;
+      color: #c9d1d9;
+    }
+
+    .modal-header, .modal-footer {
+      border-color: #30363d;
+    }
+
+    .modal-body {
+      position: relative;
+    }
+
+    .copy-modal-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #20262e 25%, #2a3038 50%, #20262e 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      height: 200px;
+      border-radius: 0.75rem;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding: 2rem 0;
+      border-top: 1px solid #30363d;
+      text-align: center;
+      color: #8b949e;
+    }
+
+    .card h3, .card p {
+      color: #c9d1d9;
+    }
+
+    .recent-searches {
+      margin-top: 1rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .recent-searches span {
+      background-color: #30363d;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      color: #c9d1d9;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 0.25rem;
+    }
+
+    .recent-searches span:hover {
+      background-color: #238636;
+    }
+
+    .recent-searches span .delete-btn {
+      margin-left: 0.5rem;
+      cursor: pointer;
+      color: #ff5c5c;
+    }
+
+    .recent-searches span .delete-btn:hover {
+      color: #ff3333;
+    }
+
+    .btn {
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
-  <!-- Your existing body content remains unchanged here -->
+  <div class="container py-5">
+    <h1 class="text-center mb-4">GitHub Gist Showcase</h1>
+    <p class="text-center mb-4">Enter a GitHub username to explore their public Gists with live previews, filtering, and easy copying. Ideal for developers and tech enthusiasts!</p>
 
-  <div id="recentSearches" class="recent-searches"></div>
+    <div class="row mb-4 justify-content-center">
+      <div class="col-md-6">
+        <input id="username" class="form-control" placeholder="Enter GitHub username" />
+      </div>
+      <div class="col-auto">
+        <button onclick="loadGists()" class="btn btn-primary">Load Gists</button>
+      </div>
+    </div>
 
-  <!-- Your existing footer and modal code remains unchanged here -->
+    <!-- Recent searches -->
+    <div id="recentSearches" class="recent-searches"></div>
 
+    <div id="categoryFilter" class="d-flex flex-wrap gap-2 justify-content-center mb-4"></div>
+    <div id="gistContainer" class="row g-4"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="codeModal" tabindex="-1" aria-labelledby="codeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="codeModalLabel">Full Code View</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <button class="btn btn-sm btn-success copy-modal-btn"><i class="fas fa-copy"></i> Copy</button>
+          <pre><code id="modalCode"></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Section -->
+  <div class="container mt-5">
+    <div class="card p-4">
+      <h3>About This Tool</h3>
+      <p>This web app allows users to explore public GitHub Gists by entering a username. Easily filter code by file type, preview it in a sleek dark-themed UI, and copy snippets directly. Whether you're a developer, educator, or learner — this tool helps you browse and interact with shared code effortlessly.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    © <span id="year"></span> Powered by <strong>Diznatics Labs</strong>. All rights reserved.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let allGists = [];
     let activeCategory = 'All';
@@ -37,20 +231,19 @@
     function loadRecentSearches() {
       const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
       const recentSearchesContainer = document.getElementById('recentSearches');
-      recentSearchesContainer.innerHTML = ''; // Clear existing
+      recentSearchesContainer.innerHTML = '';
 
       recentSearches.forEach(username => {
         const span = document.createElement('span');
         span.innerHTML = `${username} <i class="fas fa-times delete-btn"></i>`;
         span.onclick = (event) => {
-          // Only trigger search if the click is NOT on the delete button
-          if (!event.target.classList.contains('delete-btn')) {
-            loadGistsByUsername(username); // Trigger search on span click
+          if (event.target.classList.contains('delete-btn')) {
+            return;
           }
+          loadGistsByUsername(username);
         };
-        span.querySelector('.delete-btn').onclick = (event) => {
-          event.stopPropagation(); // Prevent span click when deleting
-          deleteSearch(username); // Handle delete separately
+        span.querySelector('.delete-btn').onclick = () => {
+          deleteSearch(username);
         };
         recentSearchesContainer.appendChild(span);
       });
@@ -61,7 +254,7 @@
       const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
       if (!recentSearches.includes(username)) {
         recentSearches.unshift(username);
-        if (recentSearches.length > 5) { // Limit to 5 recent searches
+        if (recentSearches.length > 5) {
           recentSearches.pop();
         }
         localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
@@ -72,21 +265,23 @@
     // Delete a search from recent searches
     function deleteSearch(username) {
       let recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
-      recentSearches = recentSearches.filter(item => item !== username); // Remove the selected username
+      recentSearches = recentSearches.filter(item => item !== username);
       localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-      loadRecentSearches(); // Reload the updated list
+      loadRecentSearches();
     }
 
     // Trigger search for a specific username
     function loadGistsByUsername(username) {
       document.getElementById('username').value = username;
-      loadGists(); // Search for this username automatically
+      loadGists();
     }
 
     function loadGists() {
-      const username = document.getElementById('username').value.trim();
+      let username = document.getElementById('username').value.trim();
+      // Basic input sanitization
+      username = username.replace(/[^a-zA-Z0-9-]/g, '');
       if (!username) {
-        alert('Please enter a GitHub username.');
+        alert('Please enter a valid GitHub username.');
         return;
       }
 
@@ -101,38 +296,50 @@
         container.appendChild(skel);
       }
 
-      saveRecentSearches(username); // Save username to localStorage
+      saveRecentSearches(username);
 
       fetch(`https://api.github.com/users/${username}/gists`)
         .then(res => {
           if (res.status === 404) {
-            // Show alert if user is not found
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-danger alert-dismissible fade show';
             alertDiv.setAttribute('role', 'alert');
             alertDiv.innerHTML = `<strong>User not found!</strong> Please check the username and try again. 
                                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-            document.body.prepend(alertDiv); // Add the alert to the top of the body
-            return Promise.reject('User not found'); // Stop further processing
+            document.body.prepend(alertDiv);
+            container.innerHTML = '';
+            return Promise.reject('User not found');
           }
-          return res.json(); // Proceed if user is found
+          if (!res.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return res.json();
         })
         .then(data => {
+          container.innerHTML = ''; // Clear skeleton loaders
           if (data.length === 0) {
-            // Handle case where the user has no public gists
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-warning alert-dismissible fade show';
             alertDiv.setAttribute('role', 'alert');
             alertDiv.innerHTML = `<strong>No Gists Found!</strong> This user has no public gists. 
                                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-            document.body.prepend(alertDiv); // Show a different alert for no gists
+            document.body.prepend(alertDiv);
           }
           allGists = data;
           displayCategories();
           displayGists('All');
         })
         .catch(err => {
-          console.error(err); // Log error for debugging (optional)
+          console.error('Error fetching gists:', err);
+          if (err.message !== 'User not found') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `<strong>Error!</strong> Failed to load gists. Please try again later. 
+                                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+            document.body.prepend(alertDiv);
+            container.innerHTML = '';
+          }
         });
     }
 
@@ -140,7 +347,7 @@
       const extSet = new Set();
       allGists.forEach(gist => {
         for (const file in gist.files) {
-          const ext = gist.files[file].filename.split('.').pop();
+          const ext = gist.files[file].filename.split('.').pop().toLowerCase();
           extSet.add(ext);
         }
       });
@@ -166,17 +373,26 @@
     function displayGists(category) {
       const container = document.getElementById('gistContainer');
       container.innerHTML = '';
+      const processedFiles = new Set(); // Track processed files to avoid duplicates
 
       allGists.forEach(gist => {
         const gistDate = new Date(gist.created_at).toLocaleDateString();
         for (const fileName in gist.files) {
           const file = gist.files[fileName];
-          const ext = file.filename.split('.').pop();
+          const ext = file.filename.split('.').pop().toLowerCase();
+          const fileKey = `${gist.id}-${fileName}`; // Unique key for each file
 
           if (category !== 'All' && ext !== category) continue;
+          if (processedFiles.has(fileKey)) continue; // Skip if already processed
+          processedFiles.add(fileKey);
 
           fetch(file.raw_url)
-            .then(res => res.text())
+            .then(res => {
+              if (!res.ok) {
+                throw new Error('Failed to fetch file content');
+              }
+              return res.text();
+            })
             .then(code => {
               const card = document.createElement('div');
               card.className = 'col-12 col-md-6 col-lg-4';
@@ -201,6 +417,22 @@
                 showModal(decoded, lang, filename);
               });
               container.appendChild(card);
+            })
+            .catch(err => {
+              console.error(`Error fetching file ${fileName}:`, err);
+              // Optionally, display a placeholder card with an error message
+              const card = document.createElement('div');
+              card.className = 'col-12 col-md-6 col-lg-4';
+              card.innerHTML = `
+                <div class="card text-white h-100">
+                  <div class="card-body">
+                    <h5 class="card-title">${file.filename}</h5>
+                    <h6 class="card-subtitle mb-2 text-danger">Error loading content</h6>
+                    <p class="card-text"><small>Created: ${gistDate}</small></p>
+                  </div>
+                </div>
+              `;
+              container.appendChild(card);
             });
         }
       });
@@ -209,16 +441,22 @@
     function showModal(code, language, filename) {
       const modalCode = document.getElementById('modalCode');
       modalCode.textContent = code;
-      hljs.highlightBlock(modalCode);
+      modalCode.className = `language-${language}`; // Set language class for Highlight.js
+      hljs.highlightElement(modalCode); // Use highlightElement for explicit language support
 
       const copyBtn = document.querySelector('.copy-modal-btn');
       copyBtn.onclick = () => {
         navigator.clipboard.writeText(code).then(() => {
           copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
           setTimeout(() => (copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'), 2000);
+        }).catch(err => {
+          console.error('Failed to copy:', err);
+          copyBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+          setTimeout(() => (copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'), 2000);
         });
       };
 
+      document.getElementById('codeModalLabel').textContent = `Full Code View: ${filename}`;
       const modal = new bootstrap.Modal(document.getElementById('codeModal'));
       modal.show();
     }
