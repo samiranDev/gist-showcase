@@ -1,4 +1,33 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row =>
+                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+                );
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -169,6 +198,13 @@
     .btn:hover {
       opacity: 0.8;
     }
+
+    /* Fullscreen modal styles */
+    .modal-fullscreen .modal-body pre {
+      max-height: none;
+      height: calc(100vh - 150px);
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -194,7 +230,7 @@
 
   <!-- Modal -->
   <div class="modal fade" id="codeModal" tabindex="-1" aria-labelledby="codeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-fullscreen">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="codeModalLabel">Full Code View</h5>
@@ -235,21 +271,16 @@
 
       recentSearches.forEach(username => {
         const span = document.createElement('span');
-        span.innerHTML = `${username} <i class="fas fa-times delete-btn"></i>`;
-        span.onclick = (event) => {
-          if (event.target.classList.contains('delete-btn')) {
-            return;
-          }
+        span.innerHTML = `${sanitizeHtml(username)} <i class="fas fa-times delete-btn" onclick="deleteSearch('${sanitizeHtml(username)}')"></i>`;
+        span.onclick = (e) => {
+          if (e.target.classList.contains('delete-btn')) return;
           loadGistsByUsername(username);
-        };
-        span.querySelector('.delete-btn').onclick = () => {
-          deleteSearch(username);
         };
         recentSearchesContainer.appendChild(span);
       });
     }
 
-    // Save recent searches to localStorage
+    // Save recent searches to local'impatto
     function saveRecentSearches(username) {
       const recentSearches = JSON.parse(localStorage.getItem('recentSearches')) || [];
       if (!recentSearches.includes(username)) {
@@ -277,11 +308,9 @@
     }
 
     function loadGists() {
-      let username = document.getElementById('username').value.trim();
-      // Basic input sanitization
-      username = username.replace(/[^a-zA-Z0-9-]/g, '');
+      const username = document.getElementById('username').value.trim();
       if (!username) {
-        alert('Please enter a valid GitHub username.');
+        showAlert('Please enter a GitHub username.', 'danger');
         return;
       }
 
@@ -298,48 +327,35 @@
 
       saveRecentSearches(username);
 
-      fetch(`https://api.github.com/users/${username}/gists`)
+      fetch(`https://api.github.com/users/${encodeURIComponent(username)}/gists`)
         .then(res => {
           if (res.status === 404) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-            alertDiv.setAttribute('role', 'alert');
-            alertDiv.innerHTML = `<strong>User not found!</strong> Please check the username and try again. 
-                                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-            document.body.prepend(alertDiv);
             container.innerHTML = '';
+            showAlert('User not found! Please check the username and try again.', 'danger');
             return Promise.reject('User not found');
           }
           if (!res.ok) {
-            throw new Error('Network response was not ok');
+            container.innerHTML = '';
+            showAlert('Failed to fetch Gists. Please try again later.', 'danger');
+            return Promise.reject('Fetch error');
           }
           return res.json();
         })
         .then(data => {
-          container.innerHTML = ''; // Clear skeleton loaders
+          container.innerHTML = '';
           if (data.length === 0) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-warning alert-dismissible fade show';
-            alertDiv.setAttribute('role', 'alert');
-            alertDiv.innerHTML = `<strong>No Gists Found!</strong> This user has no public gists. 
-                                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-            document.body.prepend(alertDiv);
+            showAlert('No Gists Found! This user has no public gists.', 'warning');
           }
           allGists = data;
           displayCategories();
           displayGists('All');
         })
         .catch(err => {
-          console.error('Error fetching gists:', err);
-          if (err.message !== 'User not found') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-            alertDiv.setAttribute('role', 'alert');
-            alertDiv.innerHTML = `<strong>Error!</strong> Failed to load gists. Please try again later. 
-                                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
-            document.body.prepend(alertDiv);
+          if (err !== 'User not found' && err !== 'Fetch error') {
             container.innerHTML = '';
+            showAlert('An unexpected error occurred. Please try again.', 'danger');
           }
+          console.error('Error:', err);
         });
     }
 
@@ -347,7 +363,7 @@
       const extSet = new Set();
       allGists.forEach(gist => {
         for (const file in gist.files) {
-          const ext = gist.files[file].filename.split('.').pop().toLowerCase();
+          const ext = gist.files[file].filename.split('.').pop() || 'txt';
           extSet.add(ext);
         }
       });
@@ -370,95 +386,104 @@
       });
     }
 
-    function displayGists(category) {
+    async function displayGists(category) {
       const container = document.getElementById('gistContainer');
       container.innerHTML = '';
-      const processedFiles = new Set(); // Track processed files to avoid duplicates
 
-      allGists.forEach(gist => {
+      for (const gist of allGists) {
         const gistDate = new Date(gist.created_at).toLocaleDateString();
         for (const fileName in gist.files) {
           const file = gist.files[fileName];
-          const ext = file.filename.split('.').pop().toLowerCase();
-          const fileKey = `${gist.id}-${fileName}`; // Unique key for each file
+          const ext = file.filename.split('.').pop() || 'txt';
 
           if (category !== 'All' && ext !== category) continue;
-          if (processedFiles.has(fileKey)) continue; // Skip if already processed
-          processedFiles.add(fileKey);
 
-          fetch(file.raw_url)
-            .then(res => {
-              if (!res.ok) {
-                throw new Error('Failed to fetch file content');
-              }
-              return res.text();
-            })
-            .then(code => {
-              const card = document.createElement('div');
-              card.className = 'col-12 col-md-6 col-lg-4';
+          try {
+            const res = await fetch(file.raw_url);
+            if (!res.ok) throw new Error('Failed to fetch file content');
+            const code = await res.text();
 
-              card.innerHTML = `
-                <div class="card text-white h-100 d-flex flex-column justify-content-between">
-                  <div class="card-body">
-                    <h5 class="card-title">${file.filename}</h5>
-                    <h6 class="card-subtitle mb-2 text-success">${gist.description || 'No description'}</h6>
-                    <p class="card-text"><small>Created: ${gistDate}</small></p>
-                  </div>
-                  <div class="card-footer text-center">
-                    <button class="btn btn-outline-light btn-sm" data-lang="${ext}" data-filename="${file.filename}" data-code="${encodeURIComponent(code)}">View</button>
-                  </div>
+            const card = document.createElement('div');
+            card.className = 'col-12 col-md-6 col-lg-4';
+
+            card.innerHTML = `
+              <div class="card text-white h-100 d-flex flex-column justify-content-between">
+                <div class="card-body">
+                  <h5 class="card-title">${sanitizeHtml(file.filename)}</h5>
+                  <h6 class="card-subtitle mb-2 text-success">${sanitizeHtml(gist.description || 'No description')}</h6>
+                  <p class="card-text"><small>Created: ${gistDate}</small></p>
+                  <pre><code class="language-${file.language?.toLowerCase() || 'text'}">${sanitizeHtml(code)}</code></pre>
                 </div>
-              `;
-              const viewBtn = card.querySelector('.btn');
-              viewBtn.addEventListener('click', () => {
-                const decoded = decodeURIComponent(viewBtn.dataset.code);
-                const lang = viewBtn.dataset.lang;
-                const filename = viewBtn.dataset.filename;
-                showModal(decoded, lang, filename);
-              });
-              container.appendChild(card);
-            })
-            .catch(err => {
-              console.error(`Error fetching file ${fileName}:`, err);
-              // Optionally, display a placeholder card with an error message
-              const card = document.createElement('div');
-              card.className = 'col-12 col-md-6 col-lg-4';
-              card.innerHTML = `
-                <div class="card text-white h-100">
-                  <div class="card-body">
-                    <h5 class="card-title">${file.filename}</h5>
-                    <h6 class="card-subtitle mb-2 text-danger">Error loading content</h6>
-                    <p class="card-text"><small>Created: ${gistDate}</small></p>
-                  </div>
+                <div class="card-footer text-center">
+                  <button class="btn btn-success view-btn" data-lang="${file.language || 'text'}" data-filename="${sanitizeHtml(file.filename)}" data-code="${encodeURIComponent(code)}">View Code</button>
                 </div>
-              `;
-              container.appendChild(card);
+              </div>
+            `;
+
+            container.appendChild(card);
+            hljs.highlightAll();
+
+            const viewBtn = card.querySelector('.view-btn');
+            viewBtn.addEventListener('click', () => {
+              const decoded = decodeURIComponent(viewBtn.dataset.code);
+              const lang = viewBtn.dataset.lang;
+              const filename = viewBtn.dataset.filename;
+              showModal(decoded, lang, filename);
             });
+          } catch (err) {
+            console.error(`Error fetching ${file.filename}:`, err);
+            const errorCard = document.createElement('div');
+            errorCard.className = 'col-12 col-md-6 col-lg-4';
+            errorCard.innerHTML = `
+              <div class="card text-white h-100">
+                <div class="card-body">
+                  <h5 class="card-title">${sanitizeHtml(file.filename)}</h5>
+                  <p class="text-danger">Failed to load content.</p>
+                </div>
+              </div>
+            `;
+            container.appendChild(errorCard);
+          }
         }
-      });
+      }
     }
 
     function showModal(code, language, filename) {
+      const modalTitle = document.getElementById('codeModalLabel');
+      modalTitle.textContent = `Code: ${sanitizeHtml(filename)}`;
+
       const modalCode = document.getElementById('modalCode');
+      modalCode.className = `language-${language?.toLowerCase() || 'text'}`;
       modalCode.textContent = code;
-      modalCode.className = `language-${language}`; // Set language class for Highlight.js
-      hljs.highlightElement(modalCode); // Use highlightElement for explicit language support
+      hljs.highlightBlock(modalCode);
 
       const copyBtn = document.querySelector('.copy-modal-btn');
       copyBtn.onclick = () => {
         navigator.clipboard.writeText(code).then(() => {
           copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
           setTimeout(() => (copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'), 2000);
-        }).catch(err => {
-          console.error('Failed to copy:', err);
-          copyBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-          setTimeout(() => (copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'), 2000);
+        }).catch(() => {
+          showAlert('Failed to copy code.', 'danger');
         });
       };
 
-      document.getElementById('codeModalLabel').textContent = `Full Code View: ${filename}`;
       const modal = new bootstrap.Modal(document.getElementById('codeModal'));
       modal.show();
+    }
+
+    function sanitizeHtml(str) {
+      return str.replace(/[&<>"'`=\/]/g, function(s) {
+        return `&#${s.charCodeAt(0)};`;
+      });
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.setAttribute('role', 'alert');
+      alertDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+      document.body.prepend(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
     }
 
     // Initialize recent searches and footer year
