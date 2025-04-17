@@ -25,7 +25,6 @@
     html, body {
       width: 100%;
       overflow-x: hidden;
-      
     }
 
     body {
@@ -34,8 +33,6 @@
       scrollbar-width: thin;
       scrollbar-color: #238636 #0d1117;
       font-size: 16px;
-      min-height:100dvh;
-      height:100%;
     }
 
     body::-webkit-scrollbar {
@@ -814,6 +811,7 @@
     let modalCurrentMatchIndex = -1;
     let isWrapped = false;
     let modalSearchTimeout = null;
+    let isCategoryExpanded = false; // Track whether categories are expanded
 
     // Load recent searches from localStorage
     function loadRecentSearches() {
@@ -965,9 +963,12 @@
         btn.textContent = cat.toUpperCase();
         btn.className = `btn ${cat === activeCategory ? 'btn-success' : 'btn-secondary'}`;
         btn.setAttribute('data-category', cat);
-        if (index >= 5) {
+        if (index >= 5 && !isCategoryExpanded) {
           btn.style.display = 'none';
           btn.classList.add('hidden-category');
+        } else {
+          btn.style.display = 'inline-flex';
+          btn.classList.remove('hidden-category');
         }
         btn.onclick = () => {
           activeCategory = cat;
@@ -980,20 +981,26 @@
       });
 
       if (categories.length > 5) {
-        viewMoreBtn.style.display = 'block';
-        viewLessBtn.style.display = 'none';
+        viewMoreBtn.style.display = isCategoryExpanded ? 'none' : 'block';
+        viewLessBtn.style.display = isCategoryExpanded ? 'block' : 'none';
 
         viewMoreBtn.onclick = () => {
+          isCategoryExpanded = true;
           container.querySelectorAll('.hidden-category').forEach(btn => {
             btn.style.display = 'inline-flex';
+            btn.classList.remove('hidden-category');
           });
           viewMoreBtn.style.display = 'none';
           viewLessBtn.style.display = 'block';
         };
 
         viewLessBtn.onclick = () => {
-          container.querySelectorAll('.hidden-category').forEach(btn => {
-            btn.style.display = 'none';
+          isCategoryExpanded = false;
+          container.querySelectorAll('.btn').forEach((btn, index) => {
+            if (index >= 5) {
+              btn.style.display = 'none';
+              btn.classList.add('hidden-category');
+            }
           });
           viewMoreBtn.style.display = 'block';
           viewLessBtn.style.display = 'none';
