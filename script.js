@@ -666,4 +666,3 @@ searchInput.addEventListener('keydown', (e) => {
     navigateSearch('next');
   }
 });
-</script>
