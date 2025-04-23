@@ -1,0 +1,778 @@
+<style>
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #0d1117;
+  color: #c9d1d9;
+  scrollbar-width: thin;
+  scrollbar-color: #238636 #0d1117;
+  font-size: clamp(14px, 2.5vw, 16px);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #238636;
+  border-radius: 10px;
+}
+
+.navbar {
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+
+.navbar-brand img {
+  height: clamp(30px, 5vw, 40px);
+  width: auto;
+}
+
+.navbar-nav .nav-link, .navbar-nav .btn {
+  color: #c9d1d9;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  margin-left: clamp(0.5rem, 1vw, 1rem);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover, .navbar-nav .btn:hover {
+  color: #238636;
+  transform: scale(1.05);
+}
+
+.navbar-nav .btn-signin {
+  background-color: #238636;
+  border-color: #238636;
+  padding: clamp(0.4rem, 1vw, 0.5rem) clamp(0.8rem, 2vw, 1rem);
+  border-radius: 0.5rem;
+}
+
+.navbar-nav .btn-signin:hover {
+  background-color: #2ea043;
+  border-color: #2ea043;
+}
+
+.navbar-toggler {
+  padding: 0.25rem 0.5rem;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: clamp(1rem, 5vh, 2rem);
+}
+
+.container-fluid.py-5 {
+  padding: clamp(0.5rem, 3vw, 1rem);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+#usernameSearch {
+  flex-wrap: nowrap;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+  width: 100%;
+  max-width: clamp(300px, 80vw, 800px);
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#usernameSearch .col-md-6 {
+  flex: 1;
+}
+
+#usernameSearch .col-auto {
+  flex: 0 0 auto;
+}
+
+.form-control {
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  border-radius: 2rem;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  width: 100%;
+}
+
+.btn {
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  touch-action: manipulation;
+  border-radius: 2rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary, .btn-success {
+  background-color: #238636;
+  border-color: #238636;
+}
+
+.btn-primary:hover, .btn-success:hover {
+  background-color: #2ea043;
+  border-color: #2ea043;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background-color: #30363d;
+  border-color: #30363d;
+  color: #c9d1d9;
+}
+
+.btn-secondary:hover {
+  background-color: #3b4148;
+}
+
+.card {
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 0.75rem;
+  transition: transform 0.2s;
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-body {
+  padding: clamp(0.75rem, 2vw, 1rem);
+}
+
+.card h3, .card p {
+  color: #c9d1d9;
+  margin-bottom: clamp(0.3rem, 1vh, 0.5rem);
+}
+
+.card pre {
+  position: relative;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  border-radius: 0.5rem;
+  max-height: clamp(100px, 20vh, 150px);
+  overflow: auto;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+}
+
+pre, code {
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.recent-searches {
+  margin-top: clamp(0.5rem, 2vh, 1rem);
+  margin-bottom: clamp(1rem, 3vh, 1.5rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+  justify-content: center;
+  width: 100%;
+  max-width: clamp(300px, 80vw, 800px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.recent-searches span {
+  background-color: #30363d;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.6rem, 2vw, 0.75rem);
+  border-radius: 1rem;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.recent-searches span:hover {
+  background-color: #238636;
+}
+
+.recent-searches span .delete-btn {
+  margin-left: clamp(0.2rem, 1vw, 0.3rem);
+  cursor: pointer;
+  color: #ff5c5c;
+}
+
+.recent-searches span .delete-btn:hover {
+  color: #ff3333;
+}
+
+#categoryFilter {
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+  flex-wrap: wrap;
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+}
+
+#categoryButtons .btn {
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.8rem, 2vw, 1rem);
+}
+
+.view-toggle-btn {
+  background: none;
+  border: none;
+  color: #c9d1d9;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  cursor: pointer;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem);
+  display: flex;
+  align-items: center;
+  gap: clamp(0.2rem, 1vw, 0.3rem);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.view-toggle-btn:hover {
+  color: #238636;
+}
+
+.view-toggle-btn i {
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+}
+
+.modal {
+  z-index: 1300;
+}
+
+.modal-content {
+  background-color: #161b22;
+  color: #c9d1d9;
+}
+
+.modal-header, .modal-footer {
+  border-color: #30363d;
+}
+
+.modal-fullscreen .modal-body {
+  position: relative;
+  padding: 0;
+}
+
+.modal-controls {
+  position: sticky;
+  top: 0;
+  background-color: #161b22;
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  display: flex;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 10;
+  border-bottom: 1px solid #30363d;
+}
+
+.modal-controls input {
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem);
+  border-radius: 0.5rem;
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  flex-grow: 1;
+  max-width: clamp(200px, 50vw, 300px);
+}
+
+.modal-controls .btn-sm {
+  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(0.6rem, 2vw, 0.75rem);
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.modal-controls .btn-sm:hover {
+  transform: scale(1.05);
+}
+
+.copy-modal-btn {
+  background-color: #238636;
+}
+
+.download-modal-btn {
+  background-color: #30363d;
+}
+
+.wrap-modal-btn {
+  background-color: #1a7f8f;
+}
+
+.modal-search-btn {
+  background-color: transparent;
+  color: #c9d1d9;
+  border: none;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem);
+}
+
+.modal-search-btn:hover {
+  color: #238636;
+  transform: scale(1.1);
+}
+
+.modal-fullscreen .modal-body pre {
+  max-height: none;
+  height: calc(100vh - clamp(150px, 30vh, 200px));
+  overflow-y: auto;
+  font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+  margin: 0;
+  background-color: #0d1117;
+}
+
+.modal-fullscreen .modal-body pre.wrap {
+  white-space: pre-wrap;
+}
+
+.copy-feedback {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #238636;
+  color: #c9d1d9;
+  padding: clamp(0.1rem, 1vw, 0.2rem) clamp(0.4rem, 1.5vw, 0.5rem);
+  border-radius: 0.3rem;
+  font-size: clamp(0.6rem, 1.5vw, 0.7rem);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.copy-feedback.show {
+  opacity: 1;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #20262e 25%, #2a3038 50%, #20262e 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  height: clamp(120px, 20vh, 150px);
+  border-radius: 0.75rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes highlightFade {
+  from { background-color: #1a4e27; }
+  to { background-color: #238636; }
+}
+
+@keyframes modernAlertEnter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes modernAlertExit {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+.modern-alert {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #161b22;
+  border: 2px solid #238636;
+  border-radius: 0.75rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  z-index: 2000;
+  max-width: clamp(250px, 80vw, 400px);
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  animation: modernAlertEnter 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  color: #c9d1d9;
+  text-align: center;
+}
+
+.modern-alert.exiting {
+  animation: modernAlertExit 0.3s ease-in forwards;
+}
+
+.modern-alert h4 {
+  margin-bottom: clamp(0.5rem, 2vh, 1rem);
+  font-size: clamp(1rem, 3vw, 1.2rem);
+}
+
+.modern-alert p {
+  margin-bottom: clamp(1rem, 3vh, 1.5rem);
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+}
+
+.modern-alert .btn-dismiss {
+  background-color: #238636;
+  border: none;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem) clamp(1rem, 3vw, 1.5rem);
+  border-radius: 0.5rem;
+  color: #c9d1d9;
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modern-alert .btn-dismiss:hover {
+  background-color: #2ea043;
+  transform: scale(1.05);
+}
+
+.btn-close {
+  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707A1 1 0 01.293.293z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+  opacity: 1;
+  width: clamp(1rem, 3vw, 1.2rem);
+  height: clamp(1rem, 3vw, 1.2rem);
+}
+
+.btn-close:hover {
+  opacity: 0.75;
+}
+
+footer {
+  margin-top: clamp(1rem, 5vh, 2rem);
+  padding: clamp(1rem, 3vh, 1.5rem) 0;
+  border-top: 1px solid #30363d;
+  text-align: center;
+  color: #8b949e;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  flex-shrink: 0;
+}
+
+.search-bar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: clamp(0.5rem, 2vw, 0.75rem) clamp(0.5rem, 2vw, 1rem);
+  z-index: 1200;
+  display: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-bar-container.active {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.3rem, 1vw, 0.5rem);
+}
+
+.search-bar-container input {
+  flex-grow: 1;
+  background-color: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem);
+  border-radius: 0.5rem;
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.search-bar-container .close-search-btn,
+.search-bar-container .nav-search-btn {
+  background-color: transparent;
+  border: none;
+  color: #c9d1d9;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  cursor: pointer;
+  padding: clamp(0.4rem, 1.5vw, 0.5rem);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.search-bar-container .close-search-btn {
+  color: #ff5c5c;
+}
+
+.search-bar-container .close-search-btn:hover {
+  color: #ff3333;
+  transform: scale(1.1);
+}
+
+.search-bar-container .nav-search-btn:hover {
+  color: #238636;
+  transform: scale(1.1);
+}
+
+mark {
+  background-color: #238636;
+  color: #c9d1d9;
+  padding: 0.1em 0.2em;
+  border-radius: 3px;
+  animation: highlightFade 0.3s ease;
+}
+
+mark.active {
+  background-color: #238636;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.7);
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: clamp(12px, 2.5vw, 14px);
+  }
+
+  .container-fluid.py-5 {
+    max-width: 90vw;
+    padding: clamp(0.3rem, 2vw, 0.5rem);
+  }
+
+  .navbar-brand img {
+    height: clamp(25px, 5vw, 30px);
+  }
+
+  .navbar-nav .nav-link, .navbar-nav .btn {
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
+    margin-left: clamp(0.3rem, 1vw, 0.5rem);
+  }
+
+  #usernameSearch {
+    flex-direction: column;
+    align-items: center;
+    max-width: 90vw;
+  }
+
+  #usernameSearch .col-md-6,
+  #usernameSearch .col-auto {
+    width: 100%;
+    max-width: clamp(250px, 80vw, 400px);
+  }
+
+  .form-control, .btn {
+    font-size: clamp(0.8rem, 2.5vw, 0.85rem);
+    padding: clamp(0.4rem, 2vw, 0.6rem);
+  }
+
+  .card {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .card pre {
+    max-height: clamp(80px, 15vh, 120px);
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+  }
+
+  .recent-searches {
+    max-width: 90vw;
+    gap: clamp(0.2rem, 1vw, 0.3rem);
+  }
+
+  .recent-searches span {
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+    padding: clamp(0.3rem, 1.5vw, 0.4rem) clamp(0.5rem, 2vw, 0.6rem);
+  }
+
+  .modal-fullscreen .modal-body pre {
+    height: calc(100vh - clamp(120px, 25vh, 180px));
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+  }
+
+  .modal-controls input {
+    max-width: 100%;
+  }
+
+  .modal-controls .btn-sm {
+    padding: clamp(0.3rem, 1.5vw, 0.4rem) clamp(0.5rem, 2vw, 0.6rem);
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+  }
+
+  .modal-search-btn {
+    padding: clamp(0.3rem, 1.5vw, 0.4rem);
+  }
+
+  .search-bar-container {
+    padding: clamp(0.3rem, 2vw, 0.5rem);
+  }
+
+  .modern-alert {
+    padding: clamp(0.75rem, 3vw, 1rem);
+    max-width: clamp(200px, 80vw, 300px);
+  }
+
+  .modern-alert h4 {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+  }
+
+  .modern-alert p {
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  }
+
+  .modern-alert .btn-dismiss {
+    padding: clamp(0.3rem, 1.5vw, 0.4rem) clamp(0.8rem, 3vw, 1.2rem);
+    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  }
+
+  .view-toggle-btn {
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
+    padding: clamp(0.3rem, 1.5vw, 0.4rem);
+  }
+
+  #categoryFilter {
+    padding: 0;
+  }
+
+  #gistContainer .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  h1 {
+    font-size: clamp(1.2rem, 5vw, 1.5rem);
+  }
+
+  .navbar-brand img {
+    height: clamp(20px, 5vw, 25px);
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar-nav .nav-link, .navbar-nav .btn {
+    margin-left: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .card h5 {
+    font-size: clamp(0.9rem, 3vw, 1rem);
+  }
+
+  .card pre {
+    max-height: clamp(60px, 15vh, 100px);
+    font-size: clamp(0.6rem, 2vw, 0.7rem);
+  }
+
+  .btn {
+    padding: clamp(0.4rem, 2vw, 0.5rem) clamp(0.8rem, 3vw, 1rem);
+  }
+
+  .recent-searches {
+    gap: clamp(0.15rem, 1vw, 0.3rem);
+  }
+
+  .recent-searches span {
+    font-size: clamp(0.6rem, 2vw, 0.7rem);
+  }
+
+  .modal-controls .btn-sm {
+    padding: clamp(0.25rem, 1.5vw, 0.3rem) clamp(0.4rem, 2vw, 0.5rem);
+    font-size: clamp(0.6rem, 2vw, 0.7rem);
+  }
+
+  .modal-controls input {
+    font-size: clamp(0.65rem, 2vw, 0.75rem);
+  }
+
+  .modern-alert {
+    padding: clamp(0.5rem, 3vw, 0.75rem);
+    max-width: clamp(180px, 80vw, 250px);
+  }
+
+  .modern-alert h4 {
+    font-size: clamp(0.8rem, 3vw, 1rem);
+  }
+
+  .modern-alert p {
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+  }
+
+  .modern-alert .btn-dismiss {
+    padding: clamp(0.25rem, 1.5vw, 0.3rem) clamp(0.6rem, 3vw, 1rem);
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+  }
+
+  .view-toggle-btn {
+    font-size: clamp(0.7rem, 2vw, 0.8rem);
+    padding: clamp(0.25rem, 1.5vw, 0.3rem);
+  }
+
+  .container-fluid.py-5 {
+    padding: clamp(0.15rem, 2vw, 0.25rem);
+  }
+
+  .search-bar-container {
+    padding: clamp(0.15rem, 2vw, 0.3rem);
+  }
+
+  #gistContainer .col-lg-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  body {
+    font-size: clamp(10px, 2.5vw, 12px);
+  }
+
+  .navbar-brand img {
+    height: clamp(18px, 5vw, 20px);
+  }
+
+  .form-control, .btn {
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+  }
+
+  .recent-searches span {
+    font-size: clamp(0.55rem, 2vw, 0.65rem);
+    padding: clamp(0.25rem, 1.5vw, 0.3rem) clamp(0.4rem, 2vw, 0.5rem);
+  }
+
+  .modal-fullscreen .modal-body pre {
+    font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+  }
+
+  .search-bar-container input {
+    font-size: clamp(0.7rem, 2.5vw, 0.8rem);
+  }
+}
+</style>
