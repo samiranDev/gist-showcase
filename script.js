@@ -1,4 +1,4 @@
-<script>
+
 // Replace with your GitHub OAuth App's Client ID
 const CLIENT_ID = 'a86b9ad9d7b2c16cee0d24fbfae0909377351bc5'; // Register at https://github.com/settings/developers
 const REDIRECT_URI = 'https://samirandev.github.io/gist-showcase';
