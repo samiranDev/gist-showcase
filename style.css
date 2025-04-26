@@ -40,10 +40,7 @@ body #particles-js{
   z-index: 2;
 }
 
-main{
-  position: relative;
-  z-index: 99;
-}
+
 
 .navbar {
   background-color: #161b22;
@@ -94,6 +91,8 @@ main{
   justify-content: center;
   align-items: center;
   padding-top: clamp(1rem, 5vh, 2rem);
+  position:relative;
+  z-index:3;
 }
 
 .container-fluid.py-5 {
